@@ -1,32 +1,36 @@
 #include <MFRC522.h>
 
-#define RST_PIN   9     // Define the reset pin
-#define SS_PIN    10    // Define the SS (Slave Select) pin
-#define IRQ_PIN   2     // Define the interrupt pin
+#define RST_PIN 9
+#define SS_PIN 10
+#define IRQ_PIN 2
 
-MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
+MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+volatile bool rfidInterrupt = false;
+
+void onRFIDInterrupt() {
+    rfidInterrupt = true;
+}
 
 void setup() {
-  Serial.begin(9600);
-  SPI.begin();        // Start SPI communication
-  mfrc522.PCD_Init(); // Initialize MFRC522
-  pinMode(IRQ_PIN, INPUT_PULLUP);  // Set the IRQ pin as input with internal pull-up resistor
-  attachInterrupt(digitalPinToInterrupt(IRQ_PIN), onRFIDInterrupt, CHANGE);
+    Serial.begin(9600);
+    SPI.begin();
+    mfrc522.PCD_Init();
+    pinMode(IRQ_PIN, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(IRQ_PIN), onRFIDInterrupt, CHANGE);
 }
 
 void loop() {
-  for(int i=0;i<100;i++)
-  {
-    Serial.print("x=");
-    Serial.println(i);
-    delay(500);
-  }
-  
-    // Your main code here
-}
+    if (rfidInterrupt) {
+        Serial.println("RFID tag detected!");
+        Serial.println("add your interrupt code here!");
+        rfidInterrupt = false;
+        // Perform the desired wake-up actions here
+    }
 
-void onRFIDInterrupt() {
-  // This function will be called when an RFID interrupt is triggered
-  Serial.println("RFID tag detected!");
-  // Perform the desired wake-up actions here
+    for (int i = 0; i < 100; i++) {
+        Serial.print("x=");
+        Serial.println(i);
+        delay(500);
+    }
 }
